@@ -3,8 +3,7 @@ import requests
 import sqlite3
 import tkinter as tk
 
-# parsing
-# koncertebi
+# defining variables
 url = 'https://tkt.ge/event'
 page = requests.get(url)
 soup = BeautifulSoup(page.text, 'html.parser')
@@ -15,6 +14,7 @@ adgili = []
 tarigebi = []
 koncertebi = []
 
+# scrapping details
 for result in results:
     satauri.append(result.text)
 
@@ -38,8 +38,7 @@ for a, b, c in zip(satauri, pasebi, adgili):
     koncertebi.append([a, b, c])
 
 
-# sqlite database
-
+# function for extracting data from sqlite database
 def all_from_sql():
     connection = sqlite3.connect('events.db')
     cursor = connection.cursor()
@@ -49,34 +48,7 @@ def all_from_sql():
     connection.close()
     return data
 
-def sataurebi_from_sql():
-    connection = sqlite3.connect('events.db')
-    cursor = connection.cursor()
-
-    cursor.execute('SELECT sataurebi FROM eventebi')
-    data = cursor.fetchall()
-    connection.close()
-    return data
-
-def fasebi_from_sql():
-    connection = sqlite3.connect('events.db')
-    cursor = connection.cursor()
-
-    cursor.execute('SELECT fasi FROM eventebi')
-    data = cursor.fetchall()
-    connection.close()
-    return data
-
-def adgili_from_sql():
-    connection = sqlite3.connect('events.db')
-    cursor = connection.cursor()
-
-    cursor.execute('SELECT adgili FROM eventebi')
-    data = cursor.fetchall()
-    connection.close()
-    return data
-
-# INSERT DATA INTO SQLITE DATABASE
+# creating sqlite table and selecting everything from that database
 
 conn = sqlite3.connect('events.db')
 cursor = conn.cursor()
@@ -90,9 +62,8 @@ cursor.execute('SELECT * FROM eventebi')
 conn.commit()
 data = cursor.fetchall()
 sql_items = [item for item in data]
-koncertebi.append(["joni", 30, "tbilisi"]) # TODO delete this
 
-
+# comparing python list items with sql database items, if there are new ones adding them
 for item in koncertebi:
     if tuple(item) not in list(sql_items):
         print("found new record")
@@ -117,12 +88,8 @@ listbox = tk.Listbox(names_frame, yscrollcommand=scrollbar.set, width=60)
 listbox.pack(side='left', fill='both', expand=True)
 scrollbar.config(command=listbox.yview)
 
-
+# adding items from sql into tkinter window
 everything_fromsql = all_from_sql()
-event_names = sataurebi_from_sql()
-event_price = fasebi_from_sql()
-event_place = adgili_from_sql()
-
 
 for i in everything_fromsql:
     listbox.insert('end', i)
